@@ -10,6 +10,8 @@ struct aec_handle {
 	uint32_t magic;
 	int32_t sample_rate;
 	void *aec;
+	float far_gain;
+	float near_gain;
 };
 
 struct aec_frame {

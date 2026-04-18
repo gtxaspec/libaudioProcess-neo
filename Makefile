@@ -18,7 +18,7 @@ SRCDIR  = src
 # Our modules
 MOD_SRC = $(addprefix $(SRCDIR)/, \
 	aec.c agc.c ns.c hpf.c lpf.c \
-	howling.c drc.c eq.c drc_eq.c biquad.c)
+	howling.c drc.c eq.c drc_eq.c biquad.c config.c)
 
 # WebRTC AEC
 AEC_SRC = $(addprefix $(SRCDIR)/webrtc/modules/audio_processing/aec/, \
