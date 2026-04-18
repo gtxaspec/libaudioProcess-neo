@@ -3,8 +3,11 @@ CROSS_COMPILE ?= mipsel-linux-
 CC      = $(CROSS_COMPILE)gcc
 STRIP   = $(CROSS_COMPILE)strip
 
-CFLAGS  = -O2 -Wall -fPIC -DMIPS_FPU_LE -DMIPS32_LE -DWEBRTC_POSIX -Isrc
+CFLAGS  = -Os -Wall -fPIC -DMIPS_FPU_LE -DMIPS32_LE -DWEBRTC_POSIX -Isrc
+CFLAGS += -ffunction-sections -fdata-sections -flto
+CFLAGS += -fno-asynchronous-unwind-tables -fmerge-all-constants -fno-ident
 LDFLAGS = -shared -lm -lpthread
+LDFLAGS += -Wl,-z,max-page-size=0x1000 -Wl,--gc-sections -Wl,--as-needed -flto
 
 TARGET  = libaudioProcess.so
 
