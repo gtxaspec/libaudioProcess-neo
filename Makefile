@@ -3,15 +3,22 @@ CROSS_COMPILE ?= mipsel-linux-
 CC      = $(CROSS_COMPILE)gcc
 STRIP   = $(CROSS_COMPILE)strip
 
-CFLAGS  = -Os -Wall -fPIC -DMIPS_FPU_LE -DMIPS32_LE -DWEBRTC_POSIX -Isrc
+CFLAGS  = -std=c11 -D_GNU_SOURCE -Os -Wall -Wextra -Werror=implicit-function-declaration
+CFLAGS += -fPIC -DMIPS_FPU_LE -DMIPS32_LE -DWEBRTC_POSIX -Isrc
 CFLAGS += -ffunction-sections -fdata-sections -flto
 CFLAGS += -fno-asynchronous-unwind-tables -fmerge-all-constants -fno-ident
-LDFLAGS = -shared -lm -lpthread
+
+LDFLAGS  = -shared -lm -lpthread
 LDFLAGS += -Wl,-z,max-page-size=0x1000 -Wl,--gc-sections -Wl,--as-needed -flto
+LDFLAGS += -Wl,--version-script=libaudioProcess.map
 
 TARGET  = libaudioProcess.so
-
 SRCDIR  = src
+
+# Our modules
+MOD_SRC = $(addprefix $(SRCDIR)/, \
+	aec.c agc.c ns.c hpf.c lpf.c \
+	howling.c drc.c eq.c drc_eq.c biquad.c)
 
 # WebRTC AEC
 AEC_SRC = $(addprefix $(SRCDIR)/webrtc/modules/audio_processing/aec/, \
@@ -56,28 +63,30 @@ SPL_SRC = $(addprefix $(SRCDIR)/webrtc/common_audio/signal_processing/, \
 VAD_SRC = $(addprefix $(SRCDIR)/webrtc/common_audio/vad/, \
 	webrtc_vad.c vad_core.c vad_filterbank.c vad_gmm.c vad_sp.c)
 
-# Our wrapper
-WRAPPER_SRC = $(SRCDIR)/audio_process.c
-
-ALL_SRC = $(WRAPPER_SRC) $(AEC_SRC) $(AGC_SRC) $(NS_SRC) $(UTIL_SRC) \
+ALL_SRC = $(MOD_SRC) $(AEC_SRC) $(AGC_SRC) $(NS_SRC) $(UTIL_SRC) \
 	  $(COMMON_SRC) $(SPL_SRC) $(VAD_SRC)
 
 OBJS = $(ALL_SRC:.c=.o)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
+$(TARGET): $(OBJS) libaudioProcess.map
+	$(CC) $(LDFLAGS) -o $@ $(OBJS)
 	$(STRIP) $@
 
-%.o: %.c
+$(SRCDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(SRCDIR)/webrtc/%.o: $(SRCDIR)/webrtc/%.c
+	$(CC) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
 
 clean:
 	rm -f $(OBJS) $(TARGET)
 
 size: $(TARGET)
-	ls -lh $(TARGET)
-	readelf -d $(TARGET) | grep NEEDED
+	@ls -lh $(TARGET)
+	@readelf -d $(TARGET) | grep NEEDED
+	@echo "Exported symbols:"
+	@nm -D --defined-only $(TARGET) | grep -c ' T '
 
 .PHONY: all clean size
