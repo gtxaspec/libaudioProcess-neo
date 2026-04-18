@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "webrtc/modules/audio_processing/aec/include/echo_cancellation.h"
 #include "webrtc/modules/audio_processing/aec/aec_core.h"
@@ -268,4 +269,146 @@ int audio_process_hpf_process(int16_t *state, int16_t *data, int num_samples)
 
 void audio_process_hpf_free(void)
 {
+}
+
+/* ---- LPF (first-order IIR, from T32 analysis) ---- */
+
+void audio_process_lpf_create(int16_t *state, int sample_rate, int cutoff_freq)
+{
+	float ratio = (float)cutoff_freq / (float)sample_rate;
+
+	state[0] = 0;
+	if (ratio > 0.0f && ratio < 0.5f) {
+		double alpha = 1.0 - exp((double)ratio * -6.283185307);
+		state[1] = (int16_t)(alpha * 256.0);
+	} else {
+		state[1] = 256;
+	}
+}
+
+void audio_process_lpf_process(int16_t *state, int16_t *data, int num_samples)
+{
+	int16_t y = state[0];
+	int16_t alpha = state[1];
+
+	for (int i = 0; i < num_samples; i++) {
+		y = (int16_t)((uint32_t)(((int32_t)data[i] - (int32_t)y) * (int32_t)alpha) >> 8) + y;
+		data[i] = y;
+	}
+
+	state[0] = y;
+}
+
+void audio_process_lpf_free(void)
+{
+}
+
+/* ---- HS (howling suppression stubs) ---- */
+
+struct hs_handle {
+	int enabled;
+};
+
+void *audio_process_hs_create(int sample_rate, int frame_size)
+{
+	(void)sample_rate;
+	(void)frame_size;
+	struct hs_handle *h = calloc(1, sizeof(*h));
+	if (h)
+		h->enabled = 1;
+	return h;
+}
+
+void audio_process_hs_process(void *handle, int16_t *data, int num_samples)
+{
+	(void)handle;
+	(void)data;
+	(void)num_samples;
+}
+
+void audio_process_hs_free(void *handle)
+{
+	free(handle);
+}
+
+/* ---- DRC/EQ stubs (T32) ---- */
+
+struct drc_eq_handle {
+	int enabled;
+};
+
+void *audio_process_drc_eq_create(int sample_rate, int channels)
+{
+	(void)sample_rate;
+	(void)channels;
+	struct drc_eq_handle *h = calloc(1, sizeof(*h));
+	return h;
+}
+
+int audio_process_drc_eq_set_config(void *handle, int drc_attack, int drc_release,
+				    int drc_threshold, int drc_ratio,
+				    int eq_bands, int eq_gains, int eq_freqs)
+{
+	(void)handle;
+	(void)drc_attack;
+	(void)drc_release;
+	(void)drc_threshold;
+	(void)drc_ratio;
+	(void)eq_bands;
+	(void)eq_gains;
+	(void)eq_freqs;
+	return 0;
+}
+
+int audio_process_drc_eq_enable(void *handle, int enable)
+{
+	struct drc_eq_handle *h = handle;
+	if (h)
+		h->enabled = enable;
+	return 0;
+}
+
+void audio_process_drc_eq_process(void *handle, const int16_t *const *in,
+				  int16_t *const *out)
+{
+	(void)handle;
+	(void)in;
+	(void)out;
+}
+
+void audio_process_drc_eq_free(void *handle)
+{
+	free(handle);
+}
+
+/* ---- DRC stubs (T41 ZRT variant, different API from drc_eq) ---- */
+
+void *audio_process_drc_create(int sample_rate, int channels)
+{
+	(void)sample_rate;
+	(void)channels;
+	return calloc(1, sizeof(int));
+}
+
+int audio_process_drc_set_config(void *handle, int attack, int release,
+				 int threshold, int ratio)
+{
+	(void)handle;
+	(void)attack;
+	(void)release;
+	(void)threshold;
+	(void)ratio;
+	return 0;
+}
+
+void audio_process_drc_process(void *handle, int16_t *data, int num_samples)
+{
+	(void)handle;
+	(void)data;
+	(void)num_samples;
+}
+
+void audio_process_drc_free(void *handle)
+{
+	free(handle);
 }
