@@ -12,7 +12,10 @@ LDFLAGS  = -shared -lm -lpthread
 LDFLAGS += -Wl,-z,max-page-size=0x1000 -Wl,--gc-sections -Wl,--as-needed -flto
 LDFLAGS += -Wl,--version-script=$(SRCDIR)/libaudioProcess.map
 
+AR      = $(CROSS_COMPILE)ar
+
 TARGET  = libaudioProcess.so
+TARGET_A = libaudioProcess.a
 SRCDIR  = src
 
 # Our modules
@@ -68,11 +71,14 @@ ALL_SRC = $(MOD_SRC) $(AEC_SRC) $(AGC_SRC) $(NS_SRC) $(UTIL_SRC) \
 
 OBJS = $(ALL_SRC:.c=.o)
 
-all: $(TARGET)
+all: $(TARGET) $(TARGET_A)
 
 $(TARGET): $(OBJS) $(SRCDIR)/libaudioProcess.map
 	$(CC) $(LDFLAGS) -o $@ $(OBJS)
 	$(STRIP) $@
+
+$(TARGET_A): $(OBJS)
+	$(AR) rcs $@ $(OBJS)
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -81,7 +87,7 @@ $(SRCDIR)/webrtc/%.o: $(SRCDIR)/webrtc/%.c
 	$(CC) $(CFLAGS) -Wno-unused-parameter -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(TARGET_A)
 
 size: $(TARGET)
 	@ls -lh $(TARGET)
