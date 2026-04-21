@@ -9,12 +9,14 @@
 
 float drc_compute_gain(struct drc_eq_state *s, float level)
 {
-	if (level <= s->threshold)
+	if (level <= s->threshold || level < 1e-10f)
 		return 1.0f;
 
 	float target;
 	if (level <= s->knee) {
 		float range = s->knee - s->threshold;
+		if (range < 1e-10f)
+			return 1.0f;
 		float x = (level - s->threshold) / range;
 		target = s->threshold + range * x * s->ratio;
 	} else {
@@ -35,7 +37,7 @@ void drc_process(struct drc_eq_state *s, float *buf, int n)
 	}
 }
 
-static struct drc_eq_state *drc_eq_alloc(int sample_rate)
+struct drc_eq_state *drc_eq_alloc(int sample_rate)
 {
 	struct drc_eq_state *s = calloc(1, sizeof(*s));
 	if (!s)

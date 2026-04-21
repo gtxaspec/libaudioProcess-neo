@@ -6,6 +6,11 @@
 void biquad_design_peaking(struct biquad *bq, float fs, float freq,
 			   float gain_db, float q)
 {
+	if (q < 0.01f)
+		q = 0.01f;
+	if (freq < 1.0f || freq >= fs * 0.5f)
+		freq = fs * 0.25f;
+
 	float A = powf(10.0f, gain_db / 40.0f);
 	float w0 = 2.0f * (float)M_PI * freq / fs;
 	float sw = sinf(w0);
@@ -24,8 +29,15 @@ void biquad_design_peaking(struct biquad *bq, float fs, float freq,
 
 void biquad_design_notch(struct biquad *bq, float fs, float freq, float bw)
 {
+	if (freq < 1.0f || freq >= fs * 0.5f)
+		freq = fs * 0.25f;
+	if (bw < 0.01f)
+		bw = 0.01f;
+
 	float w0 = 2.0f * (float)M_PI * freq / fs;
 	float sw = sinf(w0);
+	if (sw < 1e-10f)
+		sw = 1e-10f;
 	float cw = cosf(w0);
 	float alpha = sw * sinhf(logf(2.0f) / 2.0f * bw * w0 / sw);
 

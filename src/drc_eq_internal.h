@@ -25,6 +25,7 @@ struct drc_eq_state {
 	int num_eq_bands;
 };
 
+struct drc_eq_state *drc_eq_alloc(int sample_rate);
 float drc_compute_gain(struct drc_eq_state *s, float level);
 void drc_process(struct drc_eq_state *s, float *buf, int n);
 void eq_process(struct drc_eq_state *s, float *buf, int n);

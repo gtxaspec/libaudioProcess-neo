@@ -6,31 +6,13 @@
 #include "audio_process.h"
 #include "drc_eq_internal.h"
 #include "biquad.h"
-#include "util.h"
 
 /* T32 combined DRC+EQ API -- thin glue over drc.c and eq.c */
 
 void *audio_process_drc_eq_create(int sample_rate, int channels)
 {
 	(void)channels;
-
-	struct drc_eq_state *s = calloc(1, sizeof(*s));
-	if (!s)
-		return NULL;
-
-	s->sample_rate = sample_rate > 0 ? sample_rate : 16000;
-	s->frame_size = s->sample_rate / 100;
-	s->threshold = 0.5f;
-	s->knee = 0.7f;
-	s->ratio = 0.5f;
-
-	float attack_ms = 5.0f;
-	float release_ms = 50.0f;
-	s->attack_coeff = 1.0f - expf(-1000.0f /
-				      ((float)s->sample_rate * attack_ms));
-	s->release_coeff = 1.0f - expf(-1000.0f /
-				       ((float)s->sample_rate * release_ms));
-	return s;
+	return drc_eq_alloc(sample_rate);
 }
 
 int audio_process_drc_eq_set_config(void *handle, int drc_threshold,

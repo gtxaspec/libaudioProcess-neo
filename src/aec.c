@@ -70,7 +70,7 @@ fail:
 
 int audio_process_aec_process(struct aec_handle *h, struct aec_frame *f)
 {
-	if (!h || h->magic != AEC_MAGIC)
+	if (!h || h->magic != AEC_MAGIC || !f)
 		return -1;
 
 	int bytes_per_10ms = (h->sample_rate * 2) / 100;

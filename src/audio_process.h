@@ -40,7 +40,7 @@ void  audio_process_ns_process(void *ns, const float *const *in_bands,
 			       int num_bands, float *const *out_bands);
 int   audio_process_ns_free(void *ns);
 
-/* HPF (High-Pass Filter, Q13 fixed-point biquad) */
+/* HPF (High-Pass Filter, Butterworth biquad, 300 Hz cutoff) */
 void  audio_process_hpf_create(int16_t *state_x, int16_t *state_y,
 			       int16_t init_x, int16_t init_y,
 			       int count_x, int count_y);
