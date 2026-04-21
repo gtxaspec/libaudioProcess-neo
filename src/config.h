@@ -16,6 +16,20 @@ struct aec_config {
 	bool delay_agnostic;
 	bool extended_filter;
 	bool drift_compensation;
+
+	/* Ingenic AEC extensions */
+	bool user_mode;
+	float mu_min;
+	float mu_decay;
+	float cor_thd1;
+	float cor_thd2;
+	float cor_thd3;
+	float cor_thd4;
+	float far_pow_thd;
+	float safe_suppression;
+	int restrain_band_center;
+	int restrain_band_wide;
+	float restrain_factor;
 };
 
 int config_load(const char *path, struct aec_config *cfg);

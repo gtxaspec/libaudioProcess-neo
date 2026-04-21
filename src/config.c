@@ -20,6 +20,19 @@ void config_defaults(struct aec_config *cfg)
 	cfg->delay_agnostic = true;
 	cfg->extended_filter = true;
 	cfg->drift_compensation = false;
+
+	cfg->user_mode = false;
+	cfg->mu_min = 0.000001f;
+	cfg->mu_decay = 0.9f;
+	cfg->cor_thd1 = 0.98f;
+	cfg->cor_thd2 = 0.95f;
+	cfg->cor_thd3 = 0.9f;
+	cfg->cor_thd4 = 0.8f;
+	cfg->far_pow_thd = 800000.0f;
+	cfg->safe_suppression = 0.1f;
+	cfg->restrain_band_center = 0;
+	cfg->restrain_band_wide = 0;
+	cfg->restrain_factor = 0.0f;
 }
 
 static char *strip(char *s)
@@ -122,6 +135,30 @@ int config_load(const char *path, struct aec_config *cfg)
 				cfg->metrics = parse_bool(val);
 			else if (strcmp(key, "enable_delay_logging") == 0)
 				cfg->delay_logging = parse_bool(val);
+			else if (strcmp(key, "aec_mode") == 0)
+				cfg->user_mode = (strcmp(val, "user") == 0);
+			else if (strcmp(key, "set_mu_min") == 0)
+				cfg->mu_min = (float)atof(val);
+			else if (strcmp(key, "set_mu_decay") == 0)
+				cfg->mu_decay = (float)atof(val);
+			else if (strcmp(key, "set_cor_thd1") == 0)
+				cfg->cor_thd1 = (float)atof(val);
+			else if (strcmp(key, "set_cor_thd2") == 0)
+				cfg->cor_thd2 = (float)atof(val);
+			else if (strcmp(key, "set_cor_thd3") == 0)
+				cfg->cor_thd3 = (float)atof(val);
+			else if (strcmp(key, "set_cor_thd4") == 0)
+				cfg->cor_thd4 = (float)atof(val);
+			else if (strcmp(key, "set_far_pow_thd") == 0)
+				cfg->far_pow_thd = (float)atof(val);
+			else if (strcmp(key, "set_safe_suppression_value") == 0)
+				cfg->safe_suppression = (float)atof(val);
+			else if (strcmp(key, "set_restrain_band_center") == 0)
+				cfg->restrain_band_center = atoi(val);
+			else if (strcmp(key, "set_restrain_band_wide") == 0)
+				cfg->restrain_band_wide = atoi(val);
+			else if (strcmp(key, "set_restrain_factor") == 0)
+				cfg->restrain_factor = (float)atof(val);
 			break;
 
 		default:

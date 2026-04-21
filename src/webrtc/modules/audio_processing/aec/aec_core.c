@@ -176,10 +176,17 @@ static void FilterFar(AecCore* aec, float yf[2][PART_LEN1]) {
 }
 
 static void ScaleErrorSignal(AecCore* aec, float ef[2][PART_LEN1]) {
-  const float mu = aec->extended_filter_enabled ? kExtendedMu : aec->normal_mu;
+  float mu = aec->extended_filter_enabled ? kExtendedMu : aec->normal_mu;
   const float error_threshold = aec->extended_filter_enabled
                                     ? kExtendedErrorThreshold
                                     : aec->normal_error_threshold;
+  // Variable step-size: use decayed mu if Ingenic extensions are active
+  if (aec->ingenic_ext_enabled && !aec->extended_filter_enabled) {
+    mu = aec->mu_current;
+    aec->mu_current *= aec->mu_decay;
+    if (aec->mu_current < aec->mu_min)
+      aec->mu_current = aec->mu_min;
+  }
   int i;
   float abs_ef;
   for (i = 0; i < (PART_LEN1); i++) {
@@ -287,6 +294,20 @@ static void OverdriveAndSuppress(AecCore* aec,
                (1 - WebRtcAec_weightCurve[i]) * hNl[i];
     }
     hNl[i] = powf(hNl[i], aec->overDriveSm * WebRtcAec_overDriveCurve[i]);
+
+    // Suppression floor: prevent over-suppression artifacts
+    if (aec->ingenic_ext_enabled && hNl[i] < aec->safe_suppression) {
+      hNl[i] = aec->safe_suppression;
+    }
+
+    // Restrain bands: reduce suppression in protected frequency range
+    if (aec->ingenic_ext_enabled && aec->restrain_band_wide > 0) {
+      int lo = aec->restrain_band_center - aec->restrain_band_wide;
+      int hi = aec->restrain_band_center + aec->restrain_band_wide;
+      if (i >= lo && i <= hi) {
+        hNl[i] += (1.0f - hNl[i]) * aec->restrain_factor;
+      }
+    }
 
     // Suppress error signal
     efw[0][i] *= hNl[i];
@@ -1011,10 +1032,16 @@ static void NonLinearProcessing(AecCore* aec,
     aec->hNlXdAvgMin = hNlXdAvg;
   }
 
-  if (hNlDeAvg > 0.98f && hNlXdAvg > 0.9f) {
-    aec->stNearState = 1;
-  } else if (hNlDeAvg < 0.95f || hNlXdAvg < 0.8f) {
-    aec->stNearState = 0;
+  {
+    float thd1 = aec->ingenic_ext_enabled ? aec->cor_thd1 : 0.98f;
+    float thd2 = aec->ingenic_ext_enabled ? aec->cor_thd2 : 0.95f;
+    float thd3 = aec->ingenic_ext_enabled ? aec->cor_thd3 : 0.9f;
+    float thd4 = aec->ingenic_ext_enabled ? aec->cor_thd4 : 0.8f;
+    if (hNlDeAvg > thd1 && hNlXdAvg > thd3) {
+      aec->stNearState = 1;
+    } else if (hNlDeAvg < thd2 || hNlXdAvg < thd4) {
+      aec->stNearState = 0;
+    }
   }
 
   if (aec->hNlXdAvgMin == 1) {
@@ -1366,7 +1393,18 @@ static void ProcessBlock(AecCore* aec) {
 
   // Scale error signal inversely with far power.
   WebRtcAec_ScaleErrorSignal(aec, ef);
+
+  // Far-end power threshold: skip adaptation when far-end is below threshold
+  if (aec->ingenic_ext_enabled && aec->far_pow_thd > 0.0f) {
+    float far_pow = 0.0f;
+    int k;
+    for (k = 0; k < PART_LEN1; k++)
+      far_pow += aec->xPow[k];
+    if (far_pow < aec->far_pow_thd)
+      goto skip_adapt;
+  }
   WebRtcAec_FilterAdaptation(aec, fft, ef);
+skip_adapt:
   NonLinearProcessing(aec, output, outputH_ptr);
 
   if (aec->metricsMode == 1) {
@@ -1546,6 +1584,21 @@ int WebRtcAec_InitAec(AecCore* aec, int sampFreq) {
     aec->normal_error_threshold = 1.5e-6f;
     aec->num_bands = (size_t)(sampFreq / 16000);
   }
+
+  // Ingenic extension defaults (overridden by config_load if profile exists)
+  aec->ingenic_ext_enabled = 0;
+  aec->mu_min = aec->normal_mu;
+  aec->mu_decay = 1.0f;
+  aec->mu_current = aec->normal_mu;
+  aec->cor_thd1 = 0.98f;
+  aec->cor_thd2 = 0.95f;
+  aec->cor_thd3 = 0.9f;
+  aec->cor_thd4 = 0.8f;
+  aec->far_pow_thd = 0.0f;
+  aec->safe_suppression = 0.0f;
+  aec->restrain_band_center = 0;
+  aec->restrain_band_wide = 0;
+  aec->restrain_factor = 0.0f;
 
   WebRtc_InitBuffer(aec->nearFrBuf);
   WebRtc_InitBuffer(aec->outFrBuf);

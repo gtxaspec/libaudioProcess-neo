@@ -151,6 +151,21 @@ struct AecCore {
   // Runtime selection of number of filter partitions.
   int num_partitions;
 
+  // Ingenic AEC extensions (configurable via webrtc_profile.ini)
+  int ingenic_ext_enabled;
+  float mu_min;              // minimum step size (default: normal_mu)
+  float mu_decay;            // step size decay factor per frame (default: 1.0)
+  float mu_current;          // current decayed step size
+  float cor_thd1;            // coherence threshold: near-end enter (default: 0.98)
+  float cor_thd2;            // coherence threshold: near-end exit hNlDe (default: 0.95)
+  float cor_thd3;            // coherence threshold: near-end exit hNlXd (default: 0.9)
+  float cor_thd4;            // coherence threshold: near-end enter hNlXd (default: 0.8)
+  float far_pow_thd;         // far-end power threshold for adaptation (default: 0)
+  float safe_suppression;    // minimum NLP gain floor (default: 0)
+  int restrain_band_center;  // restrain band center bin (default: 0 = disabled)
+  int restrain_band_wide;    // restrain band width in bins
+  float restrain_factor;     // restrain suppression reduction factor
+
 #ifdef WEBRTC_AEC_DEBUG_DUMP
   // Sequence number of this AEC instance, so that different instances can
   // choose different dump file names.

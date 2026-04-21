@@ -8,6 +8,7 @@
 #include "util.h"
 #include "webrtc/modules/audio_processing/aec/include/echo_cancellation.h"
 #include "webrtc/modules/audio_processing/aec/aec_core.h"
+#include "webrtc/modules/audio_processing/aec/aec_core_internal.h"
 
 void *audio_process_aec_create(int sample_rate, const char *profile_path)
 {
@@ -42,6 +43,22 @@ void *audio_process_aec_create(int sample_rate, const char *profile_path)
 	struct AecCore *core = WebRtcAec_aec_core(h->aec);
 	WebRtcAec_enable_delay_agnostic(core, cfg.delay_agnostic ? 1 : 0);
 	WebRtcAec_enable_extended_filter(core, cfg.extended_filter ? 1 : 0);
+
+	if (cfg.user_mode) {
+		core->ingenic_ext_enabled = 1;
+		core->mu_min = cfg.mu_min;
+		core->mu_decay = cfg.mu_decay;
+		core->mu_current = core->normal_mu;
+		core->cor_thd1 = cfg.cor_thd1;
+		core->cor_thd2 = cfg.cor_thd2;
+		core->cor_thd3 = cfg.cor_thd3;
+		core->cor_thd4 = cfg.cor_thd4;
+		core->far_pow_thd = cfg.far_pow_thd;
+		core->safe_suppression = cfg.safe_suppression;
+		core->restrain_band_center = cfg.restrain_band_center;
+		core->restrain_band_wide = cfg.restrain_band_wide;
+		core->restrain_factor = cfg.restrain_factor;
+	}
 
 	return h;
 fail:
