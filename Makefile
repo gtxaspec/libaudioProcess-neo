@@ -4,7 +4,7 @@ CC      = $(CROSS_COMPILE)gcc
 STRIP   = $(CROSS_COMPILE)strip
 
 CFLAGS  = -std=c11 -D_GNU_SOURCE -Os -Wall -Wextra -Werror=implicit-function-declaration
-CFLAGS += -fPIC -DMIPS_FPU_LE -DMIPS32_LE -DWEBRTC_POSIX -Isrc
+CFLAGS += -fPIC -DMIPS_FPU_LE -DWEBRTC_POSIX -Isrc
 CFLAGS += -ffunction-sections -fdata-sections -flto
 CFLAGS += -fno-asynchronous-unwind-tables -fmerge-all-constants -fno-ident
 

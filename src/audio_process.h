@@ -22,8 +22,7 @@ int   audio_process_aec_free(struct aec_handle *h);
 void *audio_process_agc_create(void);
 int   audio_process_agc_set_config(void *agc, int min_level, int max_level,
 				   int mode, int sample_rate,
-				   int16_t target_level, int16_t comp_gain,
-				   uint8_t limiter_enable);
+				   WebRtcAgcConfig config);
 void  audio_process_agc_get_config(void *agc, WebRtcAgcConfig *out);
 int   audio_process_agc_process(void *agc, const int16_t *const *in_near,
 				size_t num_bands, size_t samples,

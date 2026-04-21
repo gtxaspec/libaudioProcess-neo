@@ -8,8 +8,7 @@ void *audio_process_agc_create(void)
 
 int audio_process_agc_set_config(void *agc, int min_level, int max_level,
 				 int mode, int sample_rate,
-				 int16_t target_level, int16_t comp_gain,
-				 uint8_t limiter_enable)
+				 WebRtcAgcConfig config)
 {
 	if (!agc)
 		return -1;
@@ -18,11 +17,6 @@ int audio_process_agc_set_config(void *agc, int min_level, int max_level,
 			   (uint32_t)sample_rate) != 0)
 		return -1;
 
-	WebRtcAgcConfig config = {
-		.targetLevelDbfs = target_level,
-		.compressionGaindB = comp_gain,
-		.limiterEnable = limiter_enable
-	};
 	if (WebRtcAgc_set_config(agc, config) != 0)
 		return -1;
 
@@ -41,11 +35,15 @@ int audio_process_agc_process(void *agc, const int16_t *const *in_near,
 			      int32_t *out_mic_level, int16_t echo,
 			      uint8_t *saturation_warning)
 {
-	if (WebRtcAgc_Process(agc, in_near, num_bands, samples, out,
-			      in_mic_level, out_mic_level,
-			      echo, saturation_warning) != 0)
+	if (!agc)
 		return -1;
-	return 0;
+
+	uint8_t sat_local = 0;
+	uint8_t *sat_ptr = saturation_warning ? saturation_warning : &sat_local;
+
+	return WebRtcAgc_Process(agc, in_near, num_bands, samples, out,
+				 in_mic_level, out_mic_level,
+				 echo, sat_ptr) != 0 ? -1 : 0;
 }
 
 int audio_process_agc_free(void *agc)
