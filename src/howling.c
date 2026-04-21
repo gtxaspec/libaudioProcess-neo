@@ -15,7 +15,7 @@
 #define HD_TTL_MAX     1000
 #define HD_CROSSFADE   32
 
-/* PNPR neighbor offsets: +-1 and +-4 bins from the original algorithm */
+/* PNPR neighbor offsets: +-1 and +-4 bins */
 static const int pnpr_offsets[] = {-1, -4, 3, 6};
 #define PNPR_NUM_CHECKS 4
 
