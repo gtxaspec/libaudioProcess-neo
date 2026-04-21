@@ -1,0 +1,36 @@
+{
+  global:
+    audio_process_aec_create;
+    audio_process_aec_process;
+    audio_process_aec_free;
+    audio_process_agc_create;
+    audio_process_agc_set_config;
+    audio_process_agc_get_config;
+    audio_process_agc_process;
+    audio_process_agc_free;
+    audio_process_ns_create;
+    audio_process_ns_set_config;
+    audio_process_ns_get_config;
+    audio_process_ns_process;
+    audio_process_ns_free;
+    audio_process_hpf_create;
+    audio_process_hpf_process;
+    audio_process_hpf_free;
+    audio_process_lpf_create;
+    audio_process_lpf_process;
+    audio_process_lpf_free;
+    audio_process_hs_create;
+    audio_process_hs_process;
+    audio_process_hs_free;
+    audio_process_drc_eq_create;
+    audio_process_drc_eq_set_config;
+    audio_process_drc_eq_enable;
+    audio_process_drc_eq_process;
+    audio_process_drc_eq_free;
+    audio_process_drc_create;
+    audio_process_drc_set_config;
+    audio_process_drc_process;
+    audio_process_drc_free;
+  local:
+    *;
+};

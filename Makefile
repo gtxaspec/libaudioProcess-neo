@@ -10,7 +10,7 @@ CFLAGS += -fno-asynchronous-unwind-tables -fmerge-all-constants -fno-ident
 
 LDFLAGS  = -shared -lm -lpthread
 LDFLAGS += -Wl,-z,max-page-size=0x1000 -Wl,--gc-sections -Wl,--as-needed -flto
-LDFLAGS += -Wl,--version-script=libaudioProcess.map
+LDFLAGS += -Wl,--version-script=$(SRCDIR)/libaudioProcess.map
 
 TARGET  = libaudioProcess.so
 SRCDIR  = src
@@ -70,7 +70,7 @@ OBJS = $(ALL_SRC:.c=.o)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS) libaudioProcess.map
+$(TARGET): $(OBJS) $(SRCDIR)/libaudioProcess.map
 	$(CC) $(LDFLAGS) -o $@ $(OBJS)
 	$(STRIP) $@
 
