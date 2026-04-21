@@ -4,12 +4,6 @@
 
 #include <stdint.h>
 
-/* Q13 fixed-point constants (used by HPF) */
-#define Q13_ONE       0x2000
-#define Q13_ROUND     0x800
-#define Q12_SAT_MAX   0x7FFFFFF
-#define Q12_SAT_MIN   (-0x8000000)
-
 static inline int16_t clamp_i16(float v)
 {
 	if (v > 32767.0f)

@@ -14,8 +14,7 @@
  * a float biquad struct (28 bytes) onto libimp's 32-byte allocation. The
  * filter is designed on first process call since hpf_create only does memset.
  *
- * We detect the sample rate from the audio device config (8000-96000 Hz).
- * The cutoff is 300 Hz -- standard for speech HPF, removes DC offset and
+ * Cutoff is 300 Hz -- standard for speech HPF, removes DC offset and
  * low-frequency rumble from the mic signal.
  */
 
