@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef AUDIO_PROCESS_DRC_EQ_INTERNAL_H
 #define AUDIO_PROCESS_DRC_EQ_INTERNAL_H
 

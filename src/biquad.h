@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef AUDIO_PROCESS_BIQUAD_H
 #define AUDIO_PROCESS_BIQUAD_H
 

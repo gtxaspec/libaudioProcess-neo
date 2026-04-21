@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include "drc_eq_internal.h"
 #include "biquad.h"
 

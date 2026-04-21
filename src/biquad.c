@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include "biquad.h"
 #include "util.h"
 #include <math.h>

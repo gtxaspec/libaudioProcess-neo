@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #ifndef AUDIO_PROCESS_INTERNAL_H
 #define AUDIO_PROCESS_INTERNAL_H
 

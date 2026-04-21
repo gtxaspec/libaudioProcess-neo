@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 #include "audio_process.h"
 #include "webrtc/modules/audio_processing/ns/include/noise_suppression.h"
 
